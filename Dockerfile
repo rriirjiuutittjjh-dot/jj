@@ -1,17 +1,17 @@
 FROM debian:trixie-slim
 
-USER root
+# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies (removed ttyd from apt-get)
-RUN apt-get update && apt-get install -y \
+# Install system dependencies and clean up in a single layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
     sudo \
     qemu-system-x86 \
     && rm -rf /var/lib/apt/lists/*
 
-# Manually download and install the official ttyd binary
+# Manually download and install the official ttyd binary (v1.7.7)
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then TTYD_ARCH="x86_64"; \
     elif [ "$ARCH" = "aarch64" ]; then TTYD_ARCH="aarch64"; \
@@ -19,8 +19,11 @@ RUN ARCH=$(uname -m) && \
     wget -O /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.${TTYD_ARCH} && \
     chmod +x /usr/local/bin/ttyd
 
-# Create non-root user with passwordless sudo
-RUN useradd -m -u 1000 user && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# Create a non-root user with passwordless sudo rights
+RUN useradd -m -u 1000 user && \
+    echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Switch to non-root user
 USER user
 WORKDIR /home/user
 
