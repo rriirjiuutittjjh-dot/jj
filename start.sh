@@ -1,2 +1,4 @@
 #!/bin/bash
-exec ttyd --port 8080 --interface 0.0.0.0 -c myusername:mysecurepassword bash
+
+# Download and run sshx, connecting a persistent session
+curl -sSf https://sshx.io/get | sh -s run
