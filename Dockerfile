@@ -3,18 +3,25 @@ FROM debian:trixie-slim
 USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install dependencies including ttyd and QEMU
+# Install dependencies (removed ttyd from apt-get)
 RUN apt-get update && apt-get install -y \
     curl \
     wget \
     sudo \
-    ttyd \
     qemu-system-x86 \
     && rm -rf /var/lib/apt/lists/*
 
+# Manually download and install the official ttyd binary
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then TTYD_ARCH="x86_64"; \
+    elif [ "$ARCH" = "aarch64" ]; then TTYD_ARCH="aarch64"; \
+    else echo "Unsupported architecture: $ARCH" && exit 1; fi && \
+    wget -O /usr/local/bin/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.${TTYD_ARCH} && \
+    chmod +x /usr/local/bin/ttyd
+
 # Create non-root user with passwordless sudo
 RUN useradd -m -u 1000 user && echo "user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-USER skaosw
+USER user
 WORKDIR /home/user
 
 # Copy and setup start script
