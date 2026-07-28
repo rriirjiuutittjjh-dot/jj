@@ -3,10 +3,11 @@ FROM debian:trixie-slim
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies including docker.io and clean up in a single layer
+# Install system dependencies including ca-certificates and docker.io
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
+    ca-certificates \
     sudo \
     docker.io \
     qemu-system-x86 \
